@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: demo-replicaSet
+  labels:
+    env: test
+    tier: frontend
+    release: v1.0.2
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-app-demo-test
+  template:
+    metadata:
+      name: mywebapp
+      labels:
+        app: web-app-demo-test
+    spec:
+      containers:
+        - name: demo-app-test
+          image: nginx:alpine
+          ports:
+            - name: inbound
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: shared-vol
+              mountPath: /usr/share/nginx/html
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "200Mi"
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+      initContainers:
+        - name: temp
+          image: alpine
+          command:
+            - wget
+            - "-O"
+            - "/var/tmp/index.html"
+            - https://github.com/gokumarverma/demo-testing-containers/blob/main/index.html?raw=true
+          volumeMounts:
+            - name: shared-vol
+              mountPath: /var/tmp/
+
+      volumes:
+        - name: shared-vol
+          emptyDir: {}
