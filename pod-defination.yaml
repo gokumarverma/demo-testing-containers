@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dev-demo-pod
+  labels:
+    env: dev
+    tier: frontend
+    release: v1.0.2
+    app: tesing-web-app
+spec:
+  containers:
+    - name: web-app
+      image: nginx:alpine
+      ports:
+        - name: inbound
+          containerPort: 80
+          protocol: TCP
+      volumeMounts:
+        - name: shared-vol
+          mountPath: /usr/share/nginx/html
+      resources:
+        limits:
+          cpu: "700m"
+          memory: "700Mi"
+        requests:
+          cpu: "300m"
+          memory: "300Mi"
+  initContainers:
+    - name: temp
+      image: alpine
+      command:
+        - wget
+        - "-O"
+        - "/var/tmp/index.html"
+        - https://github.com/gokumarverma/demo-testing-containers/blob/main/index.html?raw=true
+      volumeMounts:
+        - name: shared-vol
+          mountPath: /var/tmp/
+
+  volumes:
+    - name: shared-vol
+      emptyDir: {}

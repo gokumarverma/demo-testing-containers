@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: demo-replication-controller
+  labels:
+    env: dev
+    tier: frontend
+    release: v1.0.2
+
+spec:
+  replicas: 3
+  selector:
+    app: web-app-demo-dev
+  template:
+    metadata:
+      name: mywebapp
+      labels:
+        app: web-app-demo-dev
+    spec:
+      containers:
+        - name: demo-app-dev
+          image: nginx:alpine
+          ports:
+            - name: inbound
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: shared-vol
+              mountPath: /usr/share/nginx/html
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "200Mi"
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+      initContainers:
+        - name: temp
+          image: alpine
+          command:
+            - wget
+            - "-O"
+            - "/var/tmp/index.html"
+            - https://github.com/gokumarverma/demo-testing-containers/blob/main/index.html?raw=true
+          volumeMounts:
+            - name: shared-vol
+              mountPath: /var/tmp/
+
+      volumes:
+        - name: shared-vol
+          emptyDir: {}
